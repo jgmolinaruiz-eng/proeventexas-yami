@@ -16,7 +16,14 @@ load_dotenv()
 logger = logging.getLogger("agentkit")
 
 # Cliente de Anthropic
-client = AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+import httpx
+client = AsyncAnthropic(
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
+    http_client=httpx.AsyncClient(
+        timeout=30.0,
+        verify=True
+    )
+)
 
 
 def cargar_config_prompts() -> dict:
