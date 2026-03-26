@@ -80,7 +80,7 @@ async def generar_respuesta(mensaje: str, historial: list[dict]) -> str:
 
     try:
         response = await client.messages.create(
-            model="claude-sonnet-4-6",
+           model="claude-3-5-sonnet-20241022"
             max_tokens=1024,
             system=system_prompt,
             messages=mensajes
@@ -91,5 +91,5 @@ async def generar_respuesta(mensaje: str, historial: list[dict]) -> str:
         return respuesta
 
     except Exception as e:
-        logger.error(f"Error Claude API: {e}")
+        logger.error(f"Error Claude API: {type(e).__name__}: {e}")
         return obtener_mensaje_error()
