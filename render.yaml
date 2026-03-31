@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: proeventexas-yami
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn agent.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: WHATSAPP_PROVIDER
+        value: whapi
+      - key: WHAPI_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./agentkit.db
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: 10000
+    healthCheckPath: /health
