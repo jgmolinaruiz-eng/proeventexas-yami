@@ -11,18 +11,10 @@ import yaml
 import logging
 import httpx
 import anthropic
-from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
 
 load_dotenv()
 logger = logging.getLogger("agentkit")
-
-# Cliente de Anthropic
-http_client = httpx.AsyncClient(timeout=httpx.Timeout(60.0))
-client = anthropic.AsyncAnthropic(
-    api_key=os.environ.get("ANTHROPIC_API_KEY"),
-    http_client=http_client
-)
 
 
 def cargar_config_prompts() -> dict:
@@ -85,12 +77,17 @@ async def generar_respuesta(mensaje: str, historial: list[dict]) -> str:
     })
 
     try:
-        response = await client.messages.create(
-          model="claude-haiku-4-5-20251001",
-            max_tokens=1024,
-            system=system_prompt,
-            messages=mensajes
-        )
+        async with httpx.AsyncClient(timeout=httpx.Timeout(60.0)) as http_client:
+            client = anthropic.AsyncAnthropic(
+                api_key=os.environ.get("ANTHROPIC_API_KEY"),
+                http_client=http_client
+            )
+            response = await client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=1024,
+                system=system_prompt,
+                messages=mensajes
+            )
 
         respuesta = response.content[0].text
         logger.info(f"Respuesta generada ({response.usage.input_tokens} in / {response.usage.output_tokens} out)")
