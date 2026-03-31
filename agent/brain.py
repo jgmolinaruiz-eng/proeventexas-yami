@@ -20,7 +20,7 @@ import httpx
 client = AsyncAnthropic(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
     http_client=httpx.AsyncClient(
-        timeout=30.0,
+        timeout=60.0,
         verify=True
     )
 )
@@ -87,7 +87,7 @@ async def generar_respuesta(mensaje: str, historial: list[dict]) -> str:
 
     try:
         response = await client.messages.create(
-          model="claude-3-5-sonnet-20241022",
+          model="claude-haiku-4-5-20251001",
             max_tokens=1024,
             system=system_prompt,
             messages=mensajes
