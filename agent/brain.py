@@ -9,16 +9,16 @@ y genera respuestas usando la API de Anthropic Claude.
 import os
 import yaml
 import logging
+import asyncio
 import anthropic
+from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
 logger = logging.getLogger("agentkit")
 
-client = anthropic.AsyncAnthropic(
-    api_key=os.environ.get("ANTHROPIC_API_KEY"),
-    timeout=None
-)
+executor = ThreadPoolExecutor(max_workers=4)
+client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 
 def cargar_config_prompts() -> dict:
@@ -81,11 +81,15 @@ async def generar_respuesta(mensaje: str, historial: list[dict]) -> str:
     })
 
     try:
-        response = await client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=1024,
-            system=system_prompt,
-            messages=mensajes
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            executor,
+            lambda: client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=1024,
+                system=system_prompt,
+                messages=mensajes
+            )
         )
 
         respuesta = response.content[0].text
