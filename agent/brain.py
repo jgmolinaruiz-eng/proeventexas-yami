@@ -17,7 +17,7 @@ logger = logging.getLogger("agentkit")
 
 client = anthropic.AsyncAnthropic(
     api_key=os.environ.get("ANTHROPIC_API_KEY"),
-    timeout=60.0
+    timeout=None
 )
 
 
