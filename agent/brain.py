@@ -9,6 +9,8 @@ y genera respuestas usando la API de Anthropic Claude.
 import os
 import yaml
 import logging
+import httpx
+import anthropic
 from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
 
@@ -16,13 +18,10 @@ load_dotenv()
 logger = logging.getLogger("agentkit")
 
 # Cliente de Anthropic
-import httpx
-client = AsyncAnthropic(
-    api_key=os.getenv("ANTHROPIC_API_KEY"),
-    http_client=httpx.AsyncClient(
-        timeout=60.0,
-        verify=True
-    )
+http_client = httpx.AsyncClient(timeout=httpx.Timeout(60.0))
+client = anthropic.AsyncAnthropic(
+    api_key=os.environ.get("ANTHROPIC_API_KEY"),
+    http_client=http_client
 )
 
 
