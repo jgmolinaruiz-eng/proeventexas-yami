@@ -73,12 +73,7 @@ class MetaProvider:
             contacts = value.get("contacts", [])
             name = contacts[0].get("profile", {}).get("name", "") if contacts else ""
 
-            resultado = {
-                "from": msg.get("from", ""),
-                "message": msg.get("text", {}).get("body", "").strip(),
-                "message_id": msg.get("id", ""),
-                "name": name,
-            }
+         
 
            from types import SimpleNamespace
             
