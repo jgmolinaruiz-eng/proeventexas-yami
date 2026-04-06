@@ -80,6 +80,7 @@ class MetaProvider:
             resultado = SimpleNamespace(
                 es_propio=False,
                 texto=message_text,
+              telefono=sender_phone,
                 from_number=sender_phone,
                 message_id=message_id,
                 name=contact_name,
