@@ -80,7 +80,18 @@ class MetaProvider:
                 "name": name,
             }
 
-            logger.info(f"Mensaje de {resultado['from']}: {resultado['message'][:50]}")
+           from types import SimpleNamespace
+            
+            resultado = SimpleNamespace(
+                es_propio=False,
+                texto=message_text,
+                from_number=sender_phone,
+                message_id=message_id,
+                name=contact_name,
+                tipo="text",
+            )
+
+            logger.info(f"Mensaje de {sender_phone}: {message_text[:50]}")
             return [resultado]
 
         except Exception as e:
