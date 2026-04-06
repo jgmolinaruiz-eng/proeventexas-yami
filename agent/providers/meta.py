@@ -1,19 +1,17 @@
 """
-Meta Cloud API Provider para Agente Yami - Proeventexas
-Variables requeridas:
-  META_ACCESS_TOKEN, META_PHONE_NUMBER_ID, META_VERIFY_TOKEN
+Meta Cloud API Provider - Agente Yami Proeventexas
+Variables: META_ACCESS_TOKEN, META_PHONE_NUMBER_ID, META_VERIFY_TOKEN
 """
-
 import os
 import logging
 import httpx
 from typing import Optional
+from types import SimpleNamespace
 from fastapi import Request
-from fastapi.responses import PlainTextResponse
 
 logger = logging.getLogger(__name__)
-
 META_API_VERSION = "v19.0"
+
 
 class MetaProvider:
 
@@ -32,20 +30,16 @@ class MetaProvider:
         logger.info(f"MetaProvider listo | Phone ID: {self.phone_number_id}")
 
     async def validar_webhook(self, request: Request) -> Optional[str]:
-        """Verificación GET del webhook requerida por Meta."""
         mode = request.query_params.get("hub.mode")
         token = request.query_params.get("hub.verify_token")
         challenge = request.query_params.get("hub.challenge")
-
         if mode == "subscribe" and token == self.verify_token:
             logger.info("Webhook Meta verificado correctamente")
             return challenge
-
-        logger.warning(f"Verificación fallida | token_recibido={token}")
+        logger.warning(f"Verificación fallida | token={token}")
         return None
 
     async def parsear_webhook(self, request: Request) -> Optional[list]:
-        """Parsea el payload POST de Meta y retorna lista de mensajes."""
         try:
             data = await request.json()
 
@@ -70,18 +64,20 @@ class MetaProvider:
                 logger.info(f"Mensaje tipo '{msg.get('type')}' ignorado")
                 return None
 
+            sender_phone = msg.get("from", "")
+            message_id = msg.get("id", "")
+            message_text = msg.get("text", {}).get("body", "").strip()
+
+            if not message_text:
+                return None
+
             contacts = value.get("contacts", [])
-            name = contacts[0].get("profile", {}).get("name", "") if contacts else ""
+            contact_name = contacts[0].get("profile", {}).get("name", "") if contacts else ""
 
-         
-
-           from types import SimpleNamespace
-            
             resultado = SimpleNamespace(
                 es_propio=False,
                 texto=message_text,
-              telefono=sender_phone,
-                from_number=sender_phone,
+                telefono=sender_phone,
                 message_id=message_id,
                 name=contact_name,
                 tipo="text",
@@ -95,9 +91,7 @@ class MetaProvider:
             return None
 
     async def enviar_mensaje(self, to: str, message: str) -> bool:
-        """Envía mensaje de texto via Meta Cloud API."""
         to_clean = to.replace("+", "").replace(" ", "").replace("-", "")
-
         payload = {
             "messaging_product": "whatsapp",
             "recipient_type": "individual",
@@ -105,7 +99,6 @@ class MetaProvider:
             "type": "text",
             "text": {"preview_url": False, "body": message},
         }
-
         try:
             async with httpx.AsyncClient(timeout=15) as client:
                 response = await client.post(
