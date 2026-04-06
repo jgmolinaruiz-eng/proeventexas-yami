@@ -10,4 +10,4 @@ def obtener_proveedor():
         return TwilioProvider()
     else:
         from agent.providers.whapi import WhapiProvider
-        return WhapiProvider()# agent/ — Paquete principal del agente WhatsApp
+        return WhapiProvider()
